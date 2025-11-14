@@ -47,7 +47,7 @@ export type AdjustKeyMap = (
   allKeyValue: StringObject,
   currentPathKeyValue: Record<string, string>,
   path
-) => StringObject
+) => StringObject | Promise<StringObject>
 
 export interface YoudaoConfig {
   key?: string
@@ -105,6 +105,7 @@ export type Config = {
   prettier: PrettierConfig
   skipExtract: boolean
   skipTranslate: boolean
+  translateKey: boolean
   translationTextMaxLength: number
   incremental: boolean
   globalRule: GlobalRule

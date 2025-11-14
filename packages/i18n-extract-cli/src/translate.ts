@@ -150,18 +150,18 @@ export default async function (
   }
 }
 
-type tranlateFunction = (
+export type tranlateFunction = (
   word: string,
   locale: string,
   options: TranslateConfig
 ) => Promise<string | Array<{ src: string; dst: string }>>
 
-interface TranslatorConstructor {
+export interface TranslatorConstructor {
   provider: translatorType
   targetLocale: string
   providerOptions: TranslateConfig
 }
-class Translator {
+export class Translator {
   #provider: tranlateFunction
   #targetLocale: string
   #providerOptions: TranslateConfig

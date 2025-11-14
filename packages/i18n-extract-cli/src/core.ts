@@ -1,4 +1,4 @@
-import type { CommandOptions, FileExtension, TranslateConfig, PrettierConfig } from '../types'
+import { CommandOptions, FileExtension, TranslateConfig, PrettierConfig, Config } from '../types'
 import fs from 'fs-extra'
 import chalk from 'chalk'
 import inquirer from 'inquirer'
@@ -14,7 +14,7 @@ import transform from './transform'
 import log from './utils/log'
 import { getAbsolutePath } from './utils/getAbsolutePath'
 import Collector from './collector'
-import translate from './translate'
+import translate, { Translator } from './translate'
 import getLang from './utils/getLang'
 import { YOUDAO, GOOGLE, BAIDU, ALICLOUD } from './utils/constants'
 import StateManager from './utils/stateManager'
@@ -69,8 +69,26 @@ function getSourceFilePaths(input: string, exclude: string[]): string[] {
 }
 
 // TODO: 逻辑需要重写
-function saveLocale(localePath: string) {
+async function saveLocale(localePath: string, i18nConfig: Config) {
   const keyMap = Collector.getKeyMap()
+
+  if (i18nConfig.translateKey) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const translator = new Translator({
+      provider: i18nConfig.translator || YOUDAO,
+      targetLocale: 'en',
+      providerOptions: {
+        translator: i18nConfig.translator,
+        google: i18nConfig.google,
+        youdao: i18nConfig.youdao,
+        baidu: i18nConfig.baidu,
+        alicloud: i18nConfig.alicloud,
+        translationTextMaxLength: i18nConfig.translationTextMaxLength,
+      },
+    })
+    // const incrementalTranslation = await translator.translate(keyMap)
+  }
+
   const localeAbsolutePath = getAbsolutePath(process.cwd(), localePath)
 
   if (!fs.existsSync(localeAbsolutePath)) {
@@ -273,7 +291,7 @@ function formatCode(code: string, ext: string, prettierConfig: PrettierConfig): 
 
 export default async function (options: CommandOptions) {
   let i18nConfig = getI18nConfig(options)
-  if (!i18nConfig.skipTranslate) {
+  if (!i18nConfig.skipTranslate || i18nConfig.translateKey) {
     const translationConfig = await getTranslationConfig()
     i18nConfig = merge(i18nConfig, translationConfig)
   }
@@ -312,7 +330,7 @@ export default async function (options: CommandOptions) {
     )
     const startTime = new Date().getTime()
     bar.start(sourceFilePaths.length, 0)
-    sourceFilePaths.forEach((sourceFilePath) => {
+    for (const sourceFilePath of sourceFilePaths) {
       StateManager.setCurrentSourcePath(sourceFilePath)
 
       log.verbose(`正在提取文件中的中文:`, sourceFilePath)
@@ -343,7 +361,7 @@ export default async function (options: CommandOptions) {
 
       // 自定义当前文件的keyMap
       if (adjustKeyMap) {
-        const newkeyMap = adjustKeyMap(
+        const newkeyMap = await adjustKeyMap(
           cloneDeep(Collector.getKeyMap()),
           Collector.getCurrentFileKeyMap(),
           sourceFilePath
@@ -353,7 +371,7 @@ export default async function (options: CommandOptions) {
       }
 
       bar.increment()
-    })
+    }
     // 增量转换时，保留之前的提取的中文结果
     if (i18nConfig.incremental) {
       const newkeyMap = merge({}, oldPrimaryLang, Collector.getKeyMap())
@@ -362,7 +380,7 @@ export default async function (options: CommandOptions) {
 
     const extName = path.extname(localePath)
     const savePath = localePath.replace(extName, `.${localeFileType}`)
-    saveLocale(savePath)
+    await saveLocale(savePath, i18nConfig)
     bar.stop()
     const endTime = new Date().getTime()
 
