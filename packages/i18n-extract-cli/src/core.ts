@@ -9,6 +9,7 @@ import glob from 'glob'
 import merge from 'lodash/merge'
 import cloneDeep from 'lodash/cloneDeep'
 import isArray from 'lodash/isArray'
+import slash from 'slash'
 import transform from './transform'
 import log from './utils/log'
 import { getAbsolutePath } from './utils/getAbsolutePath'
@@ -39,8 +40,10 @@ function resolvePathFrom(inputPath: string) {
 function getPathFromInput(input: string, exclude: string[]) {
   const resolvePath = resolvePathFrom(input)
   if (isDirectory(resolvePath)) {
+    // 将 Windows 路径转换为正斜杠格式，确保 glob 模式在 Windows 上正常工作
+    const normalizedPath = slash(resolvePath)
     const paths = glob
-      .sync(`${resolvePath}/**/*.{cjs,mjs,js,ts,tsx,jsx,vue}`, {
+      .sync(`${normalizedPath}/**/*.{cjs,mjs,js,ts,tsx,jsx,vue}`, {
         ignore: exclude,
       })
       .filter((file) => fs.statSync(file).isFile())
@@ -97,7 +100,10 @@ function getPrettierParser(ext: string): string {
 function getOutputPath(input: string, output: string, sourceFilePath: string): string {
   let outputPath
   if (output) {
-    const filePath = sourceFilePath.replace(getAbsolutePath(process.cwd(), input) + '/', '')
+    // 规范化路径以确保 Windows 路径兼容性
+    const normalizedSourcePath = slash(sourceFilePath)
+    const normalizedInputPath = slash(getAbsolutePath(process.cwd(), input))
+    const filePath = normalizedSourcePath.replace(normalizedInputPath + '/', '')
     outputPath = getAbsolutePath(process.cwd(), output, filePath)
     fs.ensureFileSync(outputPath)
   } else {
@@ -350,7 +356,7 @@ export default async function (options: CommandOptions) {
     })
     // 增量转换时，保留之前的提取的中文结果
     if (i18nConfig.incremental) {
-      const newkeyMap = merge(oldPrimaryLang, Collector.getKeyMap())
+      const newkeyMap = merge({}, oldPrimaryLang, Collector.getKeyMap())
       Collector.setKeyMap(newkeyMap)
     }
 

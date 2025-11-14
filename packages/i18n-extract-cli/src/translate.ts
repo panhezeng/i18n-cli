@@ -5,6 +5,7 @@ import {
   baiduTranslate,
   alicloudTranslate,
 } from '@ifreeovo/translate-utils'
+import slash from 'slash'
 import type { TranslateConfig, StringObject, translatorType } from '../types'
 import { getAbsolutePath } from './utils/getAbsolutePath'
 import log from './utils/log'
@@ -101,8 +102,12 @@ export default async function (
   for (const targetLocale of locales) {
     log.info(`正在翻译${targetLocale}语言包`)
 
-    const reg = new RegExp(`/[A-Za-z-]+.${localeFileType}`, 'g')
-    const targetPath = localePath.replace(reg, `/${targetLocale}.${localeFileType}`)
+    // 将 Windows 路径转换为正斜杠格式，确保正则匹配和路径替换在 Windows 上正常工作
+    const normalizedLocalePath = slash(localePath)
+    // 转义 localeFileType 中的特殊字符，匹配文件名模式如 /zh.json
+    const escapedFileType = localeFileType.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const reg = new RegExp(`/[A-Za-z-]+\\.${escapedFileType}`, 'g')
+    const targetPath = normalizedLocalePath.replace(reg, `/${targetLocale}.${localeFileType}`)
     const targetLocalePath = getAbsolutePath(process.cwd(), targetPath)
     let oldTargetLangPack: Record<string, string> = {}
     let newTargetLangPack: Record<string, string> = {}
