@@ -129,3 +129,5 @@ export default {
 ## 开源许可证
 
 [MIT](./LICENSE)
+
+ts-node packages/i18n-extract-cli/src/index.ts -d -v -c i18n.config.ts
