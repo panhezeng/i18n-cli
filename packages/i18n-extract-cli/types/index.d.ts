@@ -47,7 +47,7 @@ export type AdjustKeyMap = (
   allKeyValue: StringObject,
   currentPathKeyValue: Record<string, string>,
   path
-) => StringObject | Promise<StringObject>
+) => Promise<StringObject>
 
 export interface YoudaoConfig {
   key?: string

@@ -100,10 +100,11 @@ export default {
   exportExcel: false,
   skipTranslate: true,
   translateKey: true,
+  translator: 'google',
   translationTextMaxLength: 5000,
   locales: ['en'],
   globalRule: { ignoreMethods: [] },
-  adjustKeyMap: function (allKeyValue, currentFileKeyMap, currentFilePath) {
+  adjustKeyMap: async function (allKeyValue, currentFileKeyMap, currentFilePath) {
     return allKeyValue
   },
 }

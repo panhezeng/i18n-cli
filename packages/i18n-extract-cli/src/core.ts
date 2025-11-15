@@ -1,4 +1,4 @@
-import { CommandOptions, FileExtension, TranslateConfig, PrettierConfig, Config } from '../types'
+import { CommandOptions, FileExtension, TranslateConfig, PrettierConfig } from '../types'
 import fs from 'fs-extra'
 import chalk from 'chalk'
 import inquirer from 'inquirer'
@@ -14,7 +14,7 @@ import transform from './transform'
 import log from './utils/log'
 import { getAbsolutePath } from './utils/getAbsolutePath'
 import Collector from './collector'
-import translate, { Translator } from './translate'
+import translate from './translate'
 import getLang from './utils/getLang'
 import { YOUDAO, GOOGLE, BAIDU, ALICLOUD } from './utils/constants'
 import StateManager from './utils/stateManager'
@@ -69,25 +69,8 @@ function getSourceFilePaths(input: string, exclude: string[]): string[] {
 }
 
 // TODO: 逻辑需要重写
-async function saveLocale(localePath: string, i18nConfig: Config) {
+function saveLocale(localePath: string) {
   const keyMap = Collector.getKeyMap()
-
-  if (i18nConfig.translateKey) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const translator = new Translator({
-      provider: i18nConfig.translator || YOUDAO,
-      targetLocale: 'en',
-      providerOptions: {
-        translator: i18nConfig.translator,
-        google: i18nConfig.google,
-        youdao: i18nConfig.youdao,
-        baidu: i18nConfig.baidu,
-        alicloud: i18nConfig.alicloud,
-        translationTextMaxLength: i18nConfig.translationTextMaxLength,
-      },
-    })
-    // const incrementalTranslation = await translator.translate(keyMap)
-  }
 
   const localeAbsolutePath = getAbsolutePath(process.cwd(), localePath)
 
@@ -291,7 +274,7 @@ function formatCode(code: string, ext: string, prettierConfig: PrettierConfig): 
 
 export default async function (options: CommandOptions) {
   let i18nConfig = getI18nConfig(options)
-  if (!i18nConfig.skipTranslate || i18nConfig.translateKey) {
+  if ((!i18nConfig.skipTranslate || i18nConfig.translateKey) && !i18nConfig.translator) {
     const translationConfig = await getTranslationConfig()
     i18nConfig = merge(i18nConfig, translationConfig)
   }
@@ -380,7 +363,7 @@ export default async function (options: CommandOptions) {
 
     const extName = path.extname(localePath)
     const savePath = localePath.replace(extName, `.${localeFileType}`)
-    await saveLocale(savePath, i18nConfig)
+    saveLocale(savePath)
     bar.stop()
     const endTime = new Date().getTime()
 

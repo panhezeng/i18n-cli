@@ -66,7 +66,7 @@ const config: Config = {
   },
   // 参数currentFileKeyMap和currentFilePath，在生成配置文件时需要展示在文件里，所以这里去掉eslint校验
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  adjustKeyMap(allKeyValue, currentFileKeyMap, currentFilePath) {
+  async adjustKeyMap(allKeyValue, currentFileKeyMap, currentFilePath) {
     return allKeyValue
   },
 }
