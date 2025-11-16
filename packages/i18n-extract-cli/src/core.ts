@@ -357,6 +357,7 @@ export default async function (options: CommandOptions) {
               // eslint-disable-next-line @typescript-eslint/no-unused-vars
               translatedText = translatedTextRes.map((item) => item.dst).join('')
             }
+            translatedText = (translatedText as string).replace(/[^a-zA-Z0-9]/g, '_')
           }
         }
 
