@@ -95,7 +95,7 @@ export default {
   excelPath:
     'D:\\Workspace\\Company\\Project\\xuetangx-fe\\apps\\rainweb\\src\\pages\\smart-mooc\\locales\\locales.xlsx',
   exportExcel: false,
-  skipTranslate: true,
+  skipTranslate: false,
   translateKey: true,
   translator: 'google',
   translationTextMaxLength: 5000,

@@ -356,8 +356,8 @@ export default async function (options: CommandOptions) {
               // eslint-disable-next-line @typescript-eslint/no-unused-vars
               translatedText = translatedTextRes.map((item) => item.dst).join('')
             }
-            translatedText = (translatedText as string).replace(/[^a-zA-Z0-9]/g, '_')
-            const keyRegex = new RegExp(`t('${translationKey}')`, 'g')
+            translatedText = (translatedText as string).replace(/[^a-zA-Z0-9]/g, '_').toUpperCase()
+            const keyRegex = new RegExp(`t\\('${translationKey}'\\)`, 'g')
             stylizedCode = stylizedCode.replace(keyRegex, `t('${translatedText}')`)
 
             // 替换 keyMap 中对应 key 的值
@@ -368,7 +368,7 @@ export default async function (options: CommandOptions) {
           }
         }
 
-        log.verbose(`生成文件内容stylizedCode:`, stylizedCode)
+        // log.verbose(`生成文件内容stylizedCode:`, stylizedCode)
 
         if (isArray(input)) {
           log.error('input为数组时，暂不支持设置dist参数')
