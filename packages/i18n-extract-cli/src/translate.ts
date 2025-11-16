@@ -193,9 +193,10 @@ export class Translator {
     targetLocale?: string,
     options?: TranslateConfig
   ): ReturnType<TranslateFunction> {
+    const _options = options || this.#providerOptions
     const [res] = await Promise.all([
       this.#provider(text, targetLocale || this.#targetLocale, options || this.#providerOptions),
-      new Promise((resolve) => setTimeout(resolve, 1000)), // 有道翻译接口限制每秒1次请求
+      new Promise((resolve) => setTimeout(resolve, _options.translator === 'youdao' ? 1000 : 1)), // 有道翻译接口限制每秒1次请求
     ])
     return res
   }

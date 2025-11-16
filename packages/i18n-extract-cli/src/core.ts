@@ -358,7 +358,10 @@ export default async function (options: CommandOptions) {
             }
             translatedText = (translatedText as string).replace(/[^a-zA-Z0-9]/g, '_').toUpperCase()
             const keyRegex = new RegExp(`t\\('${translationKey}'\\)`, 'g')
-            stylizedCode = stylizedCode.replace(keyRegex, `t('${translatedText}')`)
+            stylizedCode = stylizedCode.replace(
+              keyRegex,
+              `t('${translatedText}') || ${currentFileKeyMap[translationKey]}`
+            )
 
             // 替换 keyMap 中对应 key 的值
             if (keyMap[translationKey]) {
