@@ -8,7 +8,6 @@ export default {
       caller: '',
       functionName: 'i18n.t',
       customizeKey: function getCustomizeKey(key, path) {
-        console.log('rules js customizeKey', key, path)
         return key
       },
       customSlot: function getCustomSlot(slotValue) {
@@ -78,8 +77,6 @@ export default {
       functionNameInTemplate: '$t',
       functionNameInScript: 'i18n.t',
       customizeKey: function getCustomizeKey(key, path) {
-        // const res = await translateUtils.googleTranslate(key, 'zh-CN', 'en-US')
-        console.log('rules vue customizeKey', key, path)
         return key
       },
       customSlot: function getCustomSlot(slotValue) {
