@@ -97,7 +97,11 @@ export default {
   exportExcel: false,
   skipTranslate: false,
   translateKey: true,
-  translator: 'google',
+  translator: 'baidu',
+  baidu: {
+    key: '',
+    secret: '',
+  },
   translationTextMaxLength: 5000,
   locales: ['en'],
   globalRule: { ignoreMethods: [] },
