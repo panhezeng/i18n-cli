@@ -360,7 +360,7 @@ export default async function (options: CommandOptions) {
             const keyRegex = new RegExp(`t\\('${translationKey}'\\)`, 'g')
             stylizedCode = stylizedCode.replace(
               keyRegex,
-              `t('${translatedText}') || ${currentFileKeyMap[translationKey]}`
+              `t('${translatedText}') || '${currentFileKeyMap[translationKey]}'`
             )
 
             // 替换 keyMap 中对应 key 的值
