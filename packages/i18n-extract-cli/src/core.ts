@@ -333,6 +333,8 @@ export default async function (options: CommandOptions) {
       // 只有文件提取过中文，或文件规则forceImport为true时，才重新写入文件
       if (Collector.getCountOfAdditions() > 0 || rules[ext].forceImport) {
         const stylizedCode = formatCode(code, ext, i18nConfig.prettier)
+
+        log.verbose(`生成文件内容stylizedCode:`, stylizedCode)
         if (isArray(input)) {
           log.error('input为数组时，暂不支持设置dist参数')
           return
