@@ -330,6 +330,8 @@ export default async function (options: CommandOptions) {
       const { code } = transform(sourceCode, ext, rules, sourceFilePath)
       log.verbose(`完成中文提取和语法转换:`, sourceFilePath)
 
+      const keyMap = cloneDeep(Collector.getKeyMap())
+
       // 只有文件提取过中文，或文件规则forceImport为true时，才重新写入文件
       if (Collector.getCountOfAdditions() > 0 || rules[ext].forceImport) {
         const stylizedCode = formatCode(code, ext, i18nConfig.prettier)
@@ -346,12 +348,12 @@ export default async function (options: CommandOptions) {
 
       // 自定义当前文件的keyMap
       if (adjustKeyMap) {
-        const newkeyMap = await adjustKeyMap(
-          cloneDeep(Collector.getKeyMap()),
+        const newKeyMap = await adjustKeyMap(
+          keyMap,
           Collector.getCurrentFileKeyMap(),
           sourceFilePath
         )
-        Collector.setKeyMap(newkeyMap)
+        Collector.setKeyMap(newKeyMap)
         Collector.resetCurrentFileKeyMap()
       }
 
@@ -359,8 +361,8 @@ export default async function (options: CommandOptions) {
     }
     // 增量转换时，保留之前的提取的中文结果
     if (i18nConfig.incremental) {
-      const newkeyMap = merge({}, oldPrimaryLang, Collector.getKeyMap())
-      Collector.setKeyMap(newkeyMap)
+      const newKeyMap = merge({}, oldPrimaryLang, Collector.getKeyMap())
+      Collector.setKeyMap(newKeyMap)
     }
 
     const extName = path.extname(localePath)
