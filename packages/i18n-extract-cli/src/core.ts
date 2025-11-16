@@ -334,8 +334,7 @@ export default async function (options: CommandOptions) {
 
       // 只有文件提取过中文，或文件规则forceImport为true时，才重新写入文件
       if (Collector.getCountOfAdditions() > 0 || rules[ext].forceImport) {
-        const stylizedCode = formatCode(code, ext, i18nConfig.prettier)
-        log.verbose(`生成文件内容stylizedCode:`, stylizedCode)
+        let stylizedCode = formatCode(code, ext, i18nConfig.prettier)
 
         if (i18nConfig.translateKey) {
           const translator = new Translator({
@@ -358,8 +357,18 @@ export default async function (options: CommandOptions) {
               translatedText = translatedTextRes.map((item) => item.dst).join('')
             }
             translatedText = (translatedText as string).replace(/[^a-zA-Z0-9]/g, '_')
+            const keyRegex = new RegExp(`t('${translationKey}')`, 'g')
+            stylizedCode = stylizedCode.replace(keyRegex, `t('${translatedText}')`)
+
+            // 替换 keyMap 中对应 key 的值
+            if (keyMap[translationKey]) {
+              keyMap[translatedText] = keyMap[translationKey]
+              delete keyMap[translationKey]
+            }
           }
         }
+
+        log.verbose(`生成文件内容stylizedCode:`, stylizedCode)
 
         if (isArray(input)) {
           log.error('input为数组时，暂不支持设置dist参数')
