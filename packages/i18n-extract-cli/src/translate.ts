@@ -150,7 +150,7 @@ export default async function (
   }
 }
 
-export type tranlateFunction = (
+export type TranslateFunction = (
   word: string,
   locale: string,
   options: TranslateConfig
@@ -162,7 +162,7 @@ export interface TranslatorConstructor {
   providerOptions: TranslateConfig
 }
 export class Translator {
-  #provider: tranlateFunction
+  #provider: TranslateFunction
   #targetLocale: string
   #providerOptions: TranslateConfig
   #textLengthLimit = 5000
@@ -188,6 +188,18 @@ export class Translator {
     this.#textLengthLimit = providerOptions.translationTextMaxLength || 5000
   }
 
+  async translateText(
+    text: string,
+    targetLocale?: string,
+    options?: TranslateConfig
+  ): ReturnType<TranslateFunction> {
+    const [res] = await Promise.all([
+      this.#provider(text, targetLocale || this.#targetLocale, options || this.#providerOptions),
+      new Promise((resolve) => setTimeout(resolve, 1000)), // 有道翻译接口限制每秒1次请求
+    ])
+    return res
+  }
+
   async translate(dictionary: Record<string, string>): Promise<Record<string, string>> {
     const allTextArr = Object.keys(dictionary).map((key) => dictionary[key])
     let restTextBundleArr = allTextArr
@@ -203,14 +215,12 @@ export class Translator {
       const textBundleArr = allTextArr.slice(startIndex, startIndex + maxTranslationCount)
       restTextBundleArr = allTextArr.slice(startIndex + maxTranslationCount)
       startIndex = startIndex + maxTranslationCount
-      const [res] = await Promise.all([
-        this.#provider(
-          textBundleArr.join(this.#separator), // 文本中可能有逗号，为了防止后面分割字符出错，使用\\$代替逗号
-          this.#targetLocale,
-          this.#providerOptions
-        ),
-        new Promise((resolve) => setTimeout(resolve, 1000)), // 有道翻译接口限制每秒1次请求
-      ])
+
+      const res = await this.translateText(
+        textBundleArr.join(this.#separator), // 文本中可能有逗号，为了防止后面分割字符出错，使用\\$代替逗号
+        this.#targetLocale,
+        this.#providerOptions
+      )
 
       let resArr: string[]
       if (typeof res === 'object') {

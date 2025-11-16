@@ -1,4 +1,4 @@
-import { CommandOptions, FileExtension, TranslateConfig, PrettierConfig } from '../types'
+import { CommandOptions, FileExtension, PrettierConfig, TranslateConfig } from '../types'
 import fs from 'fs-extra'
 import chalk from 'chalk'
 import inquirer from 'inquirer'
@@ -14,9 +14,9 @@ import transform from './transform'
 import log from './utils/log'
 import { getAbsolutePath } from './utils/getAbsolutePath'
 import Collector from './collector'
-import translate from './translate'
+import translate, { Translator } from './translate'
 import getLang from './utils/getLang'
-import { YOUDAO, GOOGLE, BAIDU, ALICLOUD } from './utils/constants'
+import { ALICLOUD, BAIDU, GOOGLE, YOUDAO } from './utils/constants'
 import StateManager from './utils/stateManager'
 import exportExcel from './exportExcel'
 import { getI18nConfig } from './utils/initConfig'
@@ -256,8 +256,7 @@ async function getTranslationConfig() {
   const newConfigCache = Object.assign(oldConfigCache, answers)
   fs.writeFileSync(cachePath, JSON.stringify(newConfigCache), 'utf8')
 
-  const result = formatInquirerResult(answers)
-  return result
+  return formatInquirerResult(answers)
 }
 
 function formatCode(code: string, ext: string, prettierConfig: PrettierConfig): string {
@@ -331,12 +330,36 @@ export default async function (options: CommandOptions) {
       log.verbose(`完成中文提取和语法转换:`, sourceFilePath)
 
       const keyMap = cloneDeep(Collector.getKeyMap())
+      const currentFileKeyMap = Collector.getCurrentFileKeyMap()
 
       // 只有文件提取过中文，或文件规则forceImport为true时，才重新写入文件
       if (Collector.getCountOfAdditions() > 0 || rules[ext].forceImport) {
         const stylizedCode = formatCode(code, ext, i18nConfig.prettier)
-
         log.verbose(`生成文件内容stylizedCode:`, stylizedCode)
+
+        if (i18nConfig.translateKey) {
+          const translator = new Translator({
+            provider: i18nConfig.translator || YOUDAO,
+            targetLocale: 'en',
+            providerOptions: {
+              translator: i18nConfig.translator,
+              google: i18nConfig.google,
+              youdao: i18nConfig.youdao,
+              baidu: i18nConfig.baidu,
+              alicloud: i18nConfig.alicloud,
+              translationTextMaxLength: i18nConfig.translationTextMaxLength,
+            },
+          })
+          for (const translationKey of Object.keys(currentFileKeyMap)) {
+            const translatedTextRes = await translator.translateText(translationKey)
+            let translatedText = translatedTextRes
+            if (typeof translatedTextRes === 'object') {
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              translatedText = translatedTextRes.map((item) => item.dst).join('')
+            }
+          }
+        }
+
         if (isArray(input)) {
           log.error('input为数组时，暂不支持设置dist参数')
           return
@@ -348,11 +371,7 @@ export default async function (options: CommandOptions) {
 
       // 自定义当前文件的keyMap
       if (adjustKeyMap) {
-        const newKeyMap = await adjustKeyMap(
-          keyMap,
-          Collector.getCurrentFileKeyMap(),
-          sourceFilePath
-        )
+        const newKeyMap = await adjustKeyMap(keyMap, currentFileKeyMap, sourceFilePath)
         Collector.setKeyMap(newKeyMap)
         Collector.resetCurrentFileKeyMap()
       }
