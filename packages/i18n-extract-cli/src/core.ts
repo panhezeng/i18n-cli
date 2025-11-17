@@ -353,15 +353,13 @@ export default async function (options: CommandOptions) {
             const translatedTextRes = await translator.translateText(translationKey)
             let translatedText = translatedTextRes
             if (typeof translatedTextRes === 'object') {
-              // eslint-disable-next-line @typescript-eslint/no-unused-vars
               translatedText = translatedTextRes.map((item) => item.dst).join('')
             }
             translatedText = (translatedText as string).replace(/[^a-zA-Z0-9]/g, '_').toUpperCase()
-            const keyRegex = new RegExp(`t\\('${translationKey}'\\)`, 'g')
-            stylizedCode = stylizedCode.replace(
-              keyRegex,
-              `t('${translatedText}') || '${currentFileKeyMap[translationKey]}'`
-            )
+            // 修复正则表达式特殊字符转义问题
+            const escapedTranslationKey = translationKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+            const keyRegex = new RegExp(`t\\([^']*'${escapedTranslationKey}'`, 'g')
+            stylizedCode = stylizedCode.replace(keyRegex, `t('${translatedText}'`)
 
             // 替换 keyMap 中对应 key 的值
             if (keyMap[translationKey]) {

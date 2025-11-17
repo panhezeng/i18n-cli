@@ -1,6 +1,7 @@
 // @ts-nocheck
 export default {
-  input: 'D:\\Workspace\\Company\\Project\\xuetangx-fe\\apps\\rainweb\\src\\components\\smart-mooc',
+  input:
+    'D:\\Workspace\\Company\\Project\\xuetangx-fe\\apps\\rainweb\\src\\components\\ai-workspace\\ai-result-display',
   output: '',
   exclude: ['**/node_modules/**/*'],
   rules: {
@@ -13,7 +14,7 @@ export default {
       customSlot: function getCustomSlot(slotValue) {
         return `{${slotValue}}`
       },
-      importDeclaration: 'import { i18n } from "@/pages/smart-mooc/i18n"',
+      importDeclaration: "import { i18n } from '@/pages/ai-workspace/i18n'",
     },
     ts: {
       caller: '',
@@ -24,7 +25,7 @@ export default {
       customSlot: function getCustomSlot(slotValue) {
         return `{${slotValue}}`
       },
-      importDeclaration: 'import { i18n } from "@/pages/smart-mooc/i18n"',
+      importDeclaration: "import { i18n } from '@/pages/ai-workspace/i18n'",
     },
     cjs: {
       caller: '',
@@ -35,7 +36,7 @@ export default {
       customSlot: function getCustomSlot(slotValue) {
         return `{${slotValue}}`
       },
-      importDeclaration: 'import { i18n } from "@/pages/smart-mooc/i18n"',
+      importDeclaration: "import { i18n } from '@/pages/ai-workspace/i18n'",
     },
     mjs: {
       caller: '',
@@ -46,7 +47,7 @@ export default {
       customSlot: function getCustomSlot(slotValue) {
         return `{${slotValue}}`
       },
-      importDeclaration: 'import { i18n } from "@/pages/smart-mooc/i18n"',
+      importDeclaration: "import { i18n } from '@/pages/ai-workspace/i18n'",
     },
     jsx: {
       caller: '',
@@ -57,7 +58,7 @@ export default {
       customSlot: function getCustomSlot(slotValue) {
         return `{${slotValue}}`
       },
-      importDeclaration: 'import { i18n } from "@/pages/smart-mooc/i18n"',
+      importDeclaration: "import { i18n } from '@/pages/ai-workspace/i18n'",
       functionSnippets: '',
     },
     tsx: {
@@ -69,7 +70,7 @@ export default {
       customSlot: function getCustomSlot(slotValue) {
         return `{${slotValue}}`
       },
-      importDeclaration: 'import { i18n } from "@/pages/smart-mooc/i18n"',
+      importDeclaration: "import { i18n } from '@/pages/ai-workspace/i18n'",
       functionSnippets: '',
     },
     vue: {
@@ -82,7 +83,7 @@ export default {
       customSlot: function getCustomSlot(slotValue) {
         return `{${slotValue}}`
       },
-      importDeclaration: 'import { i18n } from "@/pages/smart-mooc/i18n"',
+      importDeclaration: "import { i18n } from '@/pages/ai-workspace/i18n'",
       tagOrder: ['template', 'script', 'style'],
     },
   },
@@ -90,18 +91,15 @@ export default {
   incremental: true,
   skipExtract: false,
   localePath:
-    'D:\\Workspace\\Company\\Project\\xuetangx-fe\\apps\\rainweb\\src\\pages\\smart-mooc\\locales\\zh.json',
-  localeFileType: 'json',
+    'D:\\Workspace\\Company\\Project\\xuetangx-fe\\apps\\rainweb\\src\\pages\\ai-workspace\\language\\AIResultDisplay\\zh.js',
+  localeFileType: 'js',
   excelPath:
-    'D:\\Workspace\\Company\\Project\\xuetangx-fe\\apps\\rainweb\\src\\pages\\smart-mooc\\locales\\locales.xlsx',
+    'D:\\Workspace\\Company\\Project\\xuetangx-fe\\apps\\rainweb\\src\\pages\\ai-workspace\\language\\AIResultDisplay\\locales.xlsx',
   exportExcel: false,
   skipTranslate: false,
   translateKey: true,
   translator: 'baidu',
-  baidu: {
-    key: '',
-    secret: '',
-  },
+  baidu: {},
   translationTextMaxLength: 5000,
   locales: ['en'],
   globalRule: { ignoreMethods: [] },
