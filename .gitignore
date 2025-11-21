@@ -132,3 +132,4 @@ public
 
 # Turbo
 .turbo/
+translateSecret.ts

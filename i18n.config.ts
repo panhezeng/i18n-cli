@@ -1,4 +1,5 @@
 // @ts-nocheck
+import translateSecret from './translateSecret'
 const commonRule = {
   caller: '',
   functionName: 'i18n.t',
@@ -55,12 +56,10 @@ export default {
     type: 'pinyin',
     prefix: 'AiResultDisplay.',
   },
-  translator: 'baidu',
-  baidu: {},
-  translationTextMaxLength: 5000,
   locales: ['en'],
   globalRule: { ignoreMethods: [] },
   adjustKeyMap: async function (allKeyValue, currentFileKeyMap, currentFilePath) {
     return allKeyValue
   },
+  ...translateSecret,
 }
