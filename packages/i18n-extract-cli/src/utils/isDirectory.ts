@@ -1,5 +1,9 @@
 import { statSync } from 'node:fs'
 
 export default function isDirectory(filePath: string): boolean {
-  return statSync(filePath).isDirectory()
+  try {
+    return statSync(filePath).isDirectory()
+  } catch (e) {
+    return false
+  }
 }

@@ -1,89 +1,44 @@
 // @ts-nocheck
+const commonRule = {
+  caller: '',
+  functionName: 'i18n.t',
+  customizeKey: function getCustomizeKey(key, path) {
+    return `AIResultDisplay.${key}`
+  },
+  customSlot: function getCustomSlot(slotValue) {
+    return `{${slotValue}}`
+  },
+  importDeclaration: "import { i18n } from '@/pages/ai-workspace/i18n'",
+  functionSnippets: '',
+}
 export default {
   input:
-    'D:\\Workspace\\Company\\Project\\xuetangx-fe\\apps\\rainweb\\src\\components\\ai-workspace\\ai-result-display',
+    'D:\\Workspace\\Company\\Project\\xuetangx-fe\\apps\\rainweb\\src\\components\\ai-workspace\\ai-result-display\\test\\**\\*.vue',
   output: '',
   exclude: ['**/node_modules/**/*'],
   rules: {
     js: {
-      caller: '',
-      functionName: 'i18n.t',
-      customizeKey: function getCustomizeKey(key, path) {
-        return key
-      },
-      customSlot: function getCustomSlot(slotValue) {
-        return `{${slotValue}}`
-      },
-      importDeclaration: "import { i18n } from '@/pages/ai-workspace/i18n'",
+      ...commonRule,
     },
     ts: {
-      caller: '',
-      functionName: 't',
-      customizeKey: function getCustomizeKey(key, path) {
-        return key
-      },
-      customSlot: function getCustomSlot(slotValue) {
-        return `{${slotValue}}`
-      },
-      importDeclaration: "import { i18n } from '@/pages/ai-workspace/i18n'",
+      ...commonRule,
     },
     cjs: {
-      caller: '',
-      functionName: 't',
-      customizeKey: function getCustomizeKey(key, path) {
-        return key
-      },
-      customSlot: function getCustomSlot(slotValue) {
-        return `{${slotValue}}`
-      },
-      importDeclaration: "import { i18n } from '@/pages/ai-workspace/i18n'",
+      ...commonRule,
     },
     mjs: {
-      caller: '',
-      functionName: 't',
-      customizeKey: function getCustomizeKey(key, path) {
-        return key
-      },
-      customSlot: function getCustomSlot(slotValue) {
-        return `{${slotValue}}`
-      },
-      importDeclaration: "import { i18n } from '@/pages/ai-workspace/i18n'",
+      ...commonRule,
     },
     jsx: {
-      caller: '',
-      functionName: 't',
-      customizeKey: function getCustomizeKey(key, path) {
-        return key
-      },
-      customSlot: function getCustomSlot(slotValue) {
-        return `{${slotValue}}`
-      },
-      importDeclaration: "import { i18n } from '@/pages/ai-workspace/i18n'",
-      functionSnippets: '',
+      ...commonRule,
     },
     tsx: {
-      caller: '',
-      functionName: 't',
-      customizeKey: function getCustomizeKey(key, path) {
-        return key
-      },
-      customSlot: function getCustomSlot(slotValue) {
-        return `{${slotValue}}`
-      },
-      importDeclaration: "import { i18n } from '@/pages/ai-workspace/i18n'",
-      functionSnippets: '',
+      ...commonRule,
     },
     vue: {
-      caller: 'this',
+      ...commonRule,
       functionNameInTemplate: '$t',
       functionNameInScript: 'i18n.t',
-      customizeKey: function getCustomizeKey(key, path) {
-        return key
-      },
-      customSlot: function getCustomSlot(slotValue) {
-        return `{${slotValue}}`
-      },
-      importDeclaration: "import { i18n } from '@/pages/ai-workspace/i18n'",
       tagOrder: ['template', 'script', 'style'],
     },
   },
@@ -96,8 +51,8 @@ export default {
   excelPath:
     'D:\\Workspace\\Company\\Project\\xuetangx-fe\\apps\\rainweb\\src\\pages\\ai-workspace\\language\\AIResultDisplay\\locales.xlsx',
   exportExcel: false,
-  skipTranslate: false,
-  translateKey: true,
+  skipTranslate: true,
+  translateKey: false,
   translator: 'baidu',
   baidu: {},
   translationTextMaxLength: 5000,

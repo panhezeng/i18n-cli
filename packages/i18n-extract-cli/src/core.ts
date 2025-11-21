@@ -38,17 +38,30 @@ function resolvePathFrom(inputPath: string) {
 }
 
 function getPathFromInput(input: string, exclude: string[]) {
+  log.debug('getPathFromInput', input)
   const resolvePath = resolvePathFrom(input)
   if (isDirectory(resolvePath)) {
     // 将 Windows 路径转换为正斜杠格式，确保 glob 模式在 Windows 上正常工作
     const normalizedPath = slash(resolvePath)
-    const paths = glob
+
+    return glob
       .sync(`${normalizedPath}/**/*.{cjs,mjs,js,ts,tsx,jsx,vue}`, {
         ignore: exclude,
       })
       .filter((file) => fs.statSync(file).isFile())
-    return paths
   } else {
+    // 可能是 glob 模式，尝试解析
+    const normalizedPath = slash(resolvePath)
+    const paths = glob
+      .sync(normalizedPath, {
+        ignore: exclude,
+      })
+      .filter((file) => fs.statSync(file).isFile())
+
+    if (paths.length > 0) {
+      return paths
+    }
+
     return [resolvePath]
   }
 }
