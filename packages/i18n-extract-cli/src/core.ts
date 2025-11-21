@@ -366,8 +366,13 @@ export default async function (options: CommandOptions) {
             keyCount++
             if (convertKeyConfig.type === 'pinyin') {
               convertedKeyText = currentKey.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_')
-              convertedKeyText = pinyin(convertedKeyText, { toneType: 'num' }) // "han4 yu3 pin1 yin1"
-              convertedKeyText = convertedKeyText.split(' ').slice(0, 4).join('_') + '_' + keyCount
+              convertedKeyText =
+                '_' +
+                pinyin(convertedKeyText, { toneType: 'num', type: 'array', nonZh: 'consecutive' })
+                  .slice(0, 4)
+                  .join('_') +
+                '_' +
+                keyCount
             } else {
               const translator = new Translator({
                 provider: i18nConfig.translator || YOUDAO,
