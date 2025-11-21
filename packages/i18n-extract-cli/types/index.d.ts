@@ -104,8 +104,10 @@ export type Config = {
   }
   prettier: PrettierConfig
   skipExtract: boolean
-  skipTranslate: boolean
-  translateKey: boolean
+  convertKeyConfig?: {
+    [key: string]: string
+  }
+  translateValue: boolean
   translationTextMaxLength: number
   incremental: boolean
   globalRule: GlobalRule

@@ -24,6 +24,7 @@ import { saveLocaleFile } from './utils/saveLocaleFile'
 import { isObject } from './utils/assertType'
 import errorLogger from './utils/error-logger'
 import isDirectory from './utils/isDirectory'
+import { pinyin } from 'pinyin-pro'
 
 interface InquirerResult {
   translator?: 'google' | 'youdao' | 'baidu' | 'alicloud'
@@ -180,7 +181,7 @@ async function getTranslationConfig() {
         { name: '阿里云机器翻译', value: ALICLOUD },
       ],
       when(answers) {
-        return !answers.skipTranslate
+        return answers.translateValue
       },
     },
     {
@@ -286,7 +287,11 @@ function formatCode(code: string, ext: string, prettierConfig: PrettierConfig): 
 
 export default async function (options: CommandOptions) {
   let i18nConfig = getI18nConfig(options)
-  if ((!i18nConfig.skipTranslate || i18nConfig.translateKey) && !i18nConfig.translator) {
+  if (
+    (i18nConfig.translateValue ||
+      (i18nConfig.convertKeyConfig && i18nConfig.convertKeyConfig.type === 'en')) &&
+    !i18nConfig.translator
+  ) {
     const translationConfig = await getTranslationConfig()
     i18nConfig = merge(i18nConfig, translationConfig)
   }
@@ -301,7 +306,8 @@ export default async function (options: CommandOptions) {
     localePath,
     locales,
     skipExtract,
-    skipTranslate,
+    convertKeyConfig,
+    translateValue,
     adjustKeyMap,
     localeFileType,
   } = i18nConfig
@@ -326,19 +332,23 @@ export default async function (options: CommandOptions) {
     const startTime = new Date().getTime()
     bar.start(sourceFilePaths.length, 0)
     for (const sourceFilePath of sourceFilePaths) {
+      const ext = path.extname(sourceFilePath).replace('.', '') as FileExtension
+      if (!rules[ext]) {
+        continue
+      }
+      const sourceCode = fs.readFileSync(sourceFilePath, 'utf8')
+      // 跳过空文件
+      if (sourceCode.trim() === '') {
+        continue
+      }
       StateManager.setCurrentSourcePath(sourceFilePath)
 
       log.verbose(`正在提取文件中的中文:`, sourceFilePath)
       errorLogger.setFilePath(sourceFilePath)
-      const sourceCode = fs.readFileSync(sourceFilePath, 'utf8')
-      const ext = path.extname(sourceFilePath).replace('.', '') as FileExtension
+
       Collector.resetCountOfAdditions()
       Collector.setCurrentCollectorPath(sourceFilePath)
-      // 跳过空文件
-      if (sourceCode.trim() === '') {
-        bar.increment()
-        return
-      }
+
       const { code } = transform(sourceCode, ext, rules, sourceFilePath)
       log.verbose(`完成中文提取和语法转换:`, sourceFilePath)
 
@@ -349,35 +359,49 @@ export default async function (options: CommandOptions) {
       if (Collector.getCountOfAdditions() > 0 || rules[ext].forceImport) {
         let stylizedCode = formatCode(code, ext, i18nConfig.prettier)
 
-        if (i18nConfig.translateKey) {
-          const translator = new Translator({
-            provider: i18nConfig.translator || YOUDAO,
-            targetLocale: 'en',
-            providerOptions: {
-              translator: i18nConfig.translator,
-              google: i18nConfig.google,
-              youdao: i18nConfig.youdao,
-              baidu: i18nConfig.baidu,
-              alicloud: i18nConfig.alicloud,
-              translationTextMaxLength: i18nConfig.translationTextMaxLength,
-            },
-          })
-          for (const translationKey of Object.keys(currentFileKeyMap)) {
-            const translatedTextRes = await translator.translateText(translationKey)
-            let translatedText = translatedTextRes
-            if (typeof translatedTextRes === 'object') {
-              translatedText = translatedTextRes.map((item) => item.dst).join('')
+        if (convertKeyConfig) {
+          let keyCount = Object.keys(keyMap).length
+          let convertedKeyText = ''
+          for (const currentKey of Object.keys(currentFileKeyMap)) {
+            keyCount++
+            if (convertKeyConfig.type === 'pinyin') {
+              convertedKeyText = currentKey.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_')
+              convertedKeyText = pinyin(convertedKeyText, { toneType: 'num' }) // "han4 yu3 pin1 yin1"
+              convertedKeyText = convertedKeyText.split(' ').slice(0, 4).join('_') + '_' + keyCount
+            } else {
+              const translator = new Translator({
+                provider: i18nConfig.translator || YOUDAO,
+                targetLocale: 'en',
+                providerOptions: {
+                  translator: i18nConfig.translator,
+                  google: i18nConfig.google,
+                  youdao: i18nConfig.youdao,
+                  baidu: i18nConfig.baidu,
+                  alicloud: i18nConfig.alicloud,
+                  translationTextMaxLength: i18nConfig.translationTextMaxLength,
+                },
+              })
+              const convertedKeyTextRes = await translator.translateText(currentKey)
+              if (typeof convertedKeyTextRes === 'object') {
+                convertedKeyText = convertedKeyTextRes.map((item) => item.dst).join('')
+              } else {
+                convertedKeyText = convertedKeyTextRes as string
+              }
+              convertedKeyText = convertedKeyText.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase()
             }
-            translatedText = (translatedText as string).replace(/[^a-zA-Z0-9]/g, '_').toUpperCase()
+
             // 修复正则表达式特殊字符转义问题
-            const escapedTranslationKey = translationKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+            const escapedTranslationKey = currentKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
             const keyRegex = new RegExp(`t\\([^']*'${escapedTranslationKey}'`, 'g')
-            stylizedCode = stylizedCode.replace(keyRegex, `t('${translatedText}'`)
+            stylizedCode = stylizedCode.replace(
+              keyRegex,
+              `t('${convertKeyConfig.prefix}${convertedKeyText}'`
+            )
 
             // 替换 keyMap 中对应 key 的值
-            if (keyMap[translationKey]) {
-              keyMap[translatedText] = keyMap[translationKey]
-              delete keyMap[translationKey]
+            if (keyMap[currentKey]) {
+              keyMap[convertedKeyText] = keyMap[currentKey]
+              delete keyMap[currentKey]
             }
           }
         }
@@ -419,7 +443,7 @@ export default async function (options: CommandOptions) {
 
   errorLogger.printErrors()
   console.log('') // 空一行
-  if (!skipTranslate) {
+  if (translateValue) {
     await translate(localePath, locales, oldPrimaryLang, {
       translator: i18nConfig.translator,
       google: i18nConfig.google,

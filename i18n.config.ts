@@ -3,7 +3,7 @@ const commonRule = {
   caller: '',
   functionName: 'i18n.t',
   customizeKey: function getCustomizeKey(key, path) {
-    return `AIResultDisplay.${key}`
+    return `${key}`
   },
   customSlot: function getCustomSlot(slotValue) {
     return `{${slotValue}}`
@@ -13,7 +13,7 @@ const commonRule = {
 }
 export default {
   input:
-    'D:\\Workspace\\Company\\Project\\xuetangx-fe\\apps\\rainweb\\src\\components\\ai-workspace\\ai-result-display\\test\\**\\*.vue',
+    'D:\\Workspace\\Company\\Project\\xuetangx-fe\\apps\\rainweb\\src\\components\\ai-workspace\\ai-result-display\\*',
   output: '',
   exclude: ['**/node_modules/**/*'],
   rules: {
@@ -46,13 +46,15 @@ export default {
   incremental: true,
   skipExtract: false,
   localePath:
-    'D:\\Workspace\\Company\\Project\\xuetangx-fe\\apps\\rainweb\\src\\pages\\ai-workspace\\language\\AIResultDisplay\\zh.js',
+    'D:\\Workspace\\Company\\Project\\xuetangx-fe\\apps\\rainweb\\src\\pages\\ai-workspace\\language\\AiResultDisplay\\zh_CN.js',
   localeFileType: 'js',
-  excelPath:
-    'D:\\Workspace\\Company\\Project\\xuetangx-fe\\apps\\rainweb\\src\\pages\\ai-workspace\\language\\AIResultDisplay\\locales.xlsx',
+  excelPath: '',
   exportExcel: false,
-  skipTranslate: true,
-  translateKey: false,
+  translateValue: true,
+  convertKeyConfig: {
+    type: 'pinyin',
+    prefix: 'AiResultDisplay.',
+  },
   translator: 'baidu',
   baidu: {},
   translationTextMaxLength: 5000,
