@@ -335,6 +335,12 @@ export default async function (options: CommandOptions) {
     )
     const startTime = new Date().getTime()
     bar.start(sourceFilePaths.length, 0)
+    let allKeyMap = cloneDeep(oldPrimaryLang)
+    const allKeys = Object.keys(allKeyMap)
+    const allKeyValues = [] as string[]
+    for (const tempKey of allKeys) {
+      allKeyValues.push(allKeyMap[tempKey])
+    }
     for (const sourceFilePath of sourceFilePaths) {
       const ext = path.extname(sourceFilePath).replace('.', '') as FileExtension
       if (!rules[ext]) {
@@ -356,7 +362,7 @@ export default async function (options: CommandOptions) {
       const { code } = transform(sourceCode, ext, rules, sourceFilePath)
       log.verbose(`完成中文提取和语法转换:`, sourceFilePath)
 
-      const keyMap = cloneDeep(Collector.getKeyMap())
+      let keyMap = cloneDeep(Collector.getKeyMap())
       const currentFileKeyMap = Collector.getCurrentFileKeyMap()
 
       // 只有文件提取过中文，或文件规则forceImport为true时，才重新写入文件
@@ -364,39 +370,47 @@ export default async function (options: CommandOptions) {
         let stylizedCode = formatCode(code, ext, i18nConfig.prettier)
 
         if (convertKeyConfig) {
-          let keyCount = Object.keys(oldPrimaryLang).length
+          let keyCount = allKeys.length
           let convertedKeyText = ''
           for (const currentKey of Object.keys(currentFileKeyMap)) {
-            keyCount++
-            if (convertKeyConfig.type === 'pinyin') {
-              convertedKeyText = currentKey.replace(/[^a-zA-Z\u4e00-\u9fa5]/g, '')
-              convertedKeyText =
-                toTitleCase(pinyin(convertedKeyText, { toneType: 'num', nonZh: 'consecutive' }))
-                  .split(' ')
-                  .slice(0, 5)
-                  .join('') +
-                'I' +
-                keyCount
+            const currentKeyValue = currentFileKeyMap[currentKey]
+            const existIndex = allKeyValues.indexOf(currentKeyValue)
+            if (existIndex !== -1) {
+              convertedKeyText = allKeys[existIndex]
             } else {
-              const translator = new Translator({
-                provider: i18nConfig.translator || YOUDAO,
-                targetLocale: 'en',
-                providerOptions: {
-                  translator: i18nConfig.translator,
-                  google: i18nConfig.google,
-                  youdao: i18nConfig.youdao,
-                  baidu: i18nConfig.baidu,
-                  alicloud: i18nConfig.alicloud,
-                  translationTextMaxLength: i18nConfig.translationTextMaxLength,
-                },
-              })
-              const convertedKeyTextRes = await translator.translateText(currentKey)
-              if (typeof convertedKeyTextRes === 'object') {
-                convertedKeyText = convertedKeyTextRes.map((item) => item.dst).join('')
+              keyCount++
+              if (convertKeyConfig.type === 'pinyin') {
+                convertedKeyText = currentKey.replace(/[^a-zA-Z\u4e00-\u9fa5]/g, '')
+                convertedKeyText =
+                  toTitleCase(pinyin(convertedKeyText, { toneType: 'num', nonZh: 'consecutive' }))
+                    .split(' ')
+                    .slice(0, 5)
+                    .join('') +
+                  'I' +
+                  keyCount
               } else {
-                convertedKeyText = convertedKeyTextRes as string
+                const translator = new Translator({
+                  provider: i18nConfig.translator || YOUDAO,
+                  targetLocale: 'en',
+                  providerOptions: {
+                    translator: i18nConfig.translator,
+                    google: i18nConfig.google,
+                    youdao: i18nConfig.youdao,
+                    baidu: i18nConfig.baidu,
+                    alicloud: i18nConfig.alicloud,
+                    translationTextMaxLength: i18nConfig.translationTextMaxLength,
+                  },
+                })
+                const convertedKeyTextRes = await translator.translateText(currentKey)
+                if (typeof convertedKeyTextRes === 'object') {
+                  convertedKeyText = convertedKeyTextRes.map((item) => item.dst).join('')
+                } else {
+                  convertedKeyText = convertedKeyTextRes as string
+                }
+                convertedKeyText = convertedKeyText.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase()
               }
-              convertedKeyText = convertedKeyText.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase()
+              allKeys.push(convertedKeyText)
+              allKeyValues.push(currentKeyValue)
             }
 
             // 修复正则表达式特殊字符转义问题
@@ -413,6 +427,8 @@ export default async function (options: CommandOptions) {
               delete keyMap[currentKey]
             }
           }
+
+          allKeyMap = merge({}, oldPrimaryLang, keyMap)
         }
 
         // log.verbose(`生成文件内容stylizedCode:`, stylizedCode)
@@ -428,13 +444,14 @@ export default async function (options: CommandOptions) {
 
       // 自定义当前文件的keyMap
       if (adjustKeyMap) {
-        const newKeyMap = await adjustKeyMap(keyMap, currentFileKeyMap, sourceFilePath)
-        Collector.setKeyMap(newKeyMap)
-        Collector.resetCurrentFileKeyMap()
+        keyMap = await adjustKeyMap(keyMap, currentFileKeyMap, sourceFilePath)
       }
+      Collector.setKeyMap(keyMap)
+      Collector.resetCurrentFileKeyMap()
 
       bar.increment()
     }
+
     // 增量转换时，保留之前的提取的中文结果
     if (i18nConfig.incremental) {
       const newKeyMap = merge({}, oldPrimaryLang, Collector.getKeyMap())
