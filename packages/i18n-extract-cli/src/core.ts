@@ -285,6 +285,10 @@ function formatCode(code: string, ext: string, prettierConfig: PrettierConfig): 
   return stylizedCode
 }
 
+function toTitleCase(str: string) {
+  return str.toLowerCase().replace(/\b\w/g, (char: string) => char.toUpperCase())
+}
+
 export default async function (options: CommandOptions) {
   let i18nConfig = getI18nConfig(options)
   if (
@@ -365,13 +369,13 @@ export default async function (options: CommandOptions) {
           for (const currentKey of Object.keys(currentFileKeyMap)) {
             keyCount++
             if (convertKeyConfig.type === 'pinyin') {
-              convertedKeyText = currentKey.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_')
+              convertedKeyText = currentKey.replace(/[^a-zA-Z\u4e00-\u9fa5]/g, '_')
               convertedKeyText =
-                '_' +
-                pinyin(convertedKeyText, { toneType: 'num', type: 'array', nonZh: 'consecutive' })
-                  .slice(0, 4)
-                  .join('_') +
-                '_' +
+                toTitleCase(pinyin(convertedKeyText, { toneType: 'num', nonZh: 'consecutive' }))
+                  .split(' ')
+                  .slice(0, 5)
+                  .join('') +
+                'I' +
                 keyCount
             } else {
               const translator = new Translator({
