@@ -364,12 +364,12 @@ export default async function (options: CommandOptions) {
         let stylizedCode = formatCode(code, ext, i18nConfig.prettier)
 
         if (convertKeyConfig) {
-          let keyCount = Object.keys(keyMap).length
+          let keyCount = Object.keys(oldPrimaryLang).length
           let convertedKeyText = ''
           for (const currentKey of Object.keys(currentFileKeyMap)) {
             keyCount++
             if (convertKeyConfig.type === 'pinyin') {
-              convertedKeyText = currentKey.replace(/[^a-zA-Z\u4e00-\u9fa5]/g, '_')
+              convertedKeyText = currentKey.replace(/[^a-zA-Z\u4e00-\u9fa5]/g, '')
               convertedKeyText =
                 toTitleCase(pinyin(convertedKeyText, { toneType: 'num', nonZh: 'consecutive' }))
                   .split(' ')
@@ -401,7 +401,7 @@ export default async function (options: CommandOptions) {
 
             // 修复正则表达式特殊字符转义问题
             const escapedTranslationKey = currentKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-            const keyRegex = new RegExp(`t\\([^']*'${escapedTranslationKey}'`, 'g')
+            const keyRegex = new RegExp(`t\\(\\s*'${escapedTranslationKey}'`, 'g')
             stylizedCode = stylizedCode.replace(
               keyRegex,
               `t('${convertKeyConfig.prefix}${convertedKeyText}'`
