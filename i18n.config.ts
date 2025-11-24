@@ -1,4 +1,9 @@
 // @ts-nocheck
+
+// \ai-result-display目录下还有类似这种 "'文字' + value + '文字'" 写法的，只要是文本加变量的写法，都改成等效的模板字符串写法
+
+// \ai-result-display目录下所有模板中还有类似这种 '文字{{ value }}-{{ value }}文字'  写法的，只要是文本加{}}这种组合的写法，都改成等效的模板字符串写法
+
 import translateSecret from './translateSecret'
 const commonRule = {
   caller: '',
@@ -13,8 +18,7 @@ const commonRule = {
   functionSnippets: '',
 }
 export default {
-  input:
-    'D:\\Workspace\\Company\\Project\\xuetangx-fe\\apps\\rainweb\\src\\components\\ai-workspace\\ai-result-display\\first-screen\\components\\**\\*',
+  input: '\\src\\components\\ai-workspace\\ai-result-display\\resource-map\\**\\*',
   output: '',
   exclude: ['**/node_modules/**/*'],
   rules: {
@@ -46,8 +50,7 @@ export default {
   prettier: { semi: false, singleQuote: true },
   incremental: true,
   skipExtract: false,
-  localePath:
-    'D:\\Workspace\\Company\\Project\\xuetangx-fe\\apps\\rainweb\\src\\pages\\ai-workspace\\language\\AiResultDisplay\\zh_CN.js',
+  localePath: '\\src\\pages\\ai-workspace\\language\\AiResultDisplay\\zh_CN.js',
   localeFileType: 'js',
   excelPath: '',
   exportExcel: false,
