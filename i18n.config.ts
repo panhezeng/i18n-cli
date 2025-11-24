@@ -14,7 +14,7 @@ const commonRule = {
 }
 export default {
   input:
-    'D:\\Workspace\\Company\\Project\\xuetangx-fe\\apps\\rainweb\\src\\components\\ai-workspace\\ai-result-display\\components\\*',
+    'D:\\Workspace\\Company\\Project\\xuetangx-fe\\apps\\rainweb\\src\\components\\ai-workspace\\ai-result-display\\first-screen\\components\\**\\*',
   output: '',
   exclude: ['**/node_modules/**/*'],
   rules: {
