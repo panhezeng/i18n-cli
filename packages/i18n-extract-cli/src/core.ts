@@ -384,6 +384,10 @@ export default async function (options: CommandOptions) {
           let convertedKeyText = ''
           for (const currentKey of Object.keys(currentFileKeyMap)) {
             const currentKeyValue = currentFileKeyMap[currentKey]
+            if (/^https?:\/\//.test(currentKeyValue)) {
+              delete keyMap[currentKey]
+              continue
+            }
             const existIndex = allKeyValues.indexOf(currentKeyValue)
             if (existIndex !== -1) {
               convertedKeyText = allKeys[existIndex]
