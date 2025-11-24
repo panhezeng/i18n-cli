@@ -1,4 +1,10 @@
-import { CommandOptions, FileExtension, PrettierConfig, TranslateConfig } from '../types'
+import {
+  CommandOptions,
+  FileExtension,
+  PrettierConfig,
+  StringObject,
+  TranslateConfig,
+} from '../types'
 import fs from 'fs-extra'
 import chalk from 'chalk'
 import inquirer from 'inquirer'
@@ -335,9 +341,13 @@ export default async function (options: CommandOptions) {
     )
     const startTime = new Date().getTime()
     bar.start(sourceFilePaths.length, 0)
-    let allKeyMap = cloneDeep(oldPrimaryLang)
+    let allKeyMap = Collector.getKeyMap()
+    // 增量转换时，保留之前的提取的中文结果
+    if (i18nConfig.incremental) {
+      allKeyMap = merge({}, oldPrimaryLang, allKeyMap)
+    }
     const allKeys = Object.keys(allKeyMap)
-    const allKeyValues = [] as string[]
+    const allKeyValues = [] as (string | StringObject)[]
     for (const tempKey of allKeys) {
       allKeyValues.push(allKeyMap[tempKey])
     }
@@ -411,6 +421,7 @@ export default async function (options: CommandOptions) {
               }
               allKeys.push(convertedKeyText)
               allKeyValues.push(currentKeyValue)
+              allKeyMap[convertedKeyText] = currentKeyValue
             }
 
             // 修复正则表达式特殊字符转义问题
