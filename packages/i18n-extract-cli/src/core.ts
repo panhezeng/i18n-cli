@@ -295,6 +295,15 @@ function toTitleCase(str: string) {
   return str.toLowerCase().replace(/\b\w/g, (char: string) => char.toUpperCase())
 }
 
+function toPascalCase(str: string) {
+  return (
+    str
+      .match(/[a-z]+/gi)
+      ?.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join('') || ''
+  )
+}
+
 export default async function (options: CommandOptions) {
   let i18nConfig = getI18nConfig(options)
   if (
@@ -393,12 +402,13 @@ export default async function (options: CommandOptions) {
               convertedKeyText = allKeys[existIndex]
             } else {
               keyCount++
+              const maxLimit = convertKeyConfig.maxLimit || 5
               if (convertKeyConfig.type === 'pinyin') {
                 convertedKeyText = currentKey.replace(/[^a-zA-Z\u4e00-\u9fa5]/g, '')
                 convertedKeyText =
                   toTitleCase(pinyin(convertedKeyText, { toneType: 'num', nonZh: 'consecutive' }))
                     .split(' ')
-                    .slice(0, 5)
+                    .slice(0, Number(maxLimit))
                     .join('') +
                   'I' +
                   keyCount
@@ -421,7 +431,11 @@ export default async function (options: CommandOptions) {
                 } else {
                   convertedKeyText = convertedKeyTextRes as string
                 }
-                convertedKeyText = convertedKeyText.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase()
+                convertedKeyText = currentKey.replace(/[^a-zA-Z\u4e00-\u9fa5]/g, '')
+                convertedKeyText =
+                  toPascalCase(convertedKeyText.split(' ').slice(0, Number(maxLimit)).join('')) +
+                  '_' +
+                  keyCount
               }
               allKeys.push(convertedKeyText)
               allKeyValues.push(currentKeyValue)

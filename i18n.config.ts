@@ -18,7 +18,8 @@ const commonRule = {
   functionSnippets: '',
 }
 export default {
-  input: '\\src\\components\\ai-workspace\\ai-result-display\\resource-map\\**\\*',
+  input:
+    'D:\\Workspace\\Company\\Project\\xuetangx-fe\\apps\\rainweb\\src\\components\\ai-workspace\\ai-center\\digital-human-assets\\**\\*',
   output: '',
   exclude: ['**/node_modules/**/*'],
   rules: {
@@ -50,14 +51,16 @@ export default {
   prettier: { semi: false, singleQuote: true },
   incremental: true,
   skipExtract: false,
-  localePath: '\\src\\pages\\ai-workspace\\language\\AiResultDisplay\\zh_CN.js',
+  localePath:
+    'D:\\Workspace\\Company\\Project\\xuetangx-fe\\apps\\rainweb\\src\\pages\\ai-workspace\\language\\AICenter\\DigitalHumanAssets\\zh_CN.js',
   localeFileType: 'js',
   excelPath: '',
   exportExcel: false,
   translateValue: true,
   convertKeyConfig: {
-    type: 'pinyin',
-    prefix: 'AiResultDisplay.',
+    // type: 'pinyin',
+    prefix: 'AICenter.DigitalHumanAssets.',
+    maxLimit: 5,
   },
   locales: ['en'],
   globalRule: { ignoreMethods: [] },
